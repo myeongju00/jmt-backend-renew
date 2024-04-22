@@ -28,7 +28,7 @@ dependencies {
 	//db
 	implementation("org.postgresql:postgresql:42.7.3")
 	//Hibernate Validator
-	implementation("org.hibernate.validator:hibernate-validator:8.0.1")
+	implementation("org.hibernate.validator:hibernate-validator:8.0.1.Final")
 }
 
 tasks.named('test') {
