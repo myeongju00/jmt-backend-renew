@@ -1,10 +1,9 @@
-package com.gdsc.jmt.user.entity;
+package com.gdsc.jmt.domain.user.entity;
 
+import com.gdsc.jmt.domain.user.entity.common.RoleType;
+import com.gdsc.jmt.domain.user.entity.common.Status;
 import com.gdsc.jmt.global.entity.BaseTimeEntity;
-import com.gdsc.jmt.user.entity.common.RoleType;
-import com.gdsc.jmt.user.entity.common.SocialType;
-import com.gdsc.jmt.user.entity.common.Status;
-import jakarta.annotation.Nullable;
+import com.gdsc.jmt.domain.user.entity.common.SocialType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,11 +12,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity @Table(name = "tb_user")
 public class UserEntity  extends BaseTimeEntity {
     @Id
@@ -40,4 +41,14 @@ public class UserEntity  extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    @Builder
+    public UserEntity(String email, SocialType socialType,
+                      RoleType roleType, Status status) {
+        this.email = email;
+        this.socialType = socialType;
+        this.roleType = roleType;
+        this.status = status;
+    }
+
 }

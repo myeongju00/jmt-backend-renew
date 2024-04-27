@@ -1,4 +1,4 @@
-package com.gdsc.jmt.user.entity.common;
+package com.gdsc.jmt.domain.user.entity.common;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
