@@ -30,9 +30,18 @@ dependencies {
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:_")
 
 	//db
-	implementation("org.postgresql:postgresql:42.7.3")
+	implementation("org.postgresql:postgresql:_")
 	//Hibernate Validator
-	implementation("org.hibernate.validator:hibernate-validator:8.0.1.Final")
+	implementation("org.hibernate.validator:hibernate-validator:_")
+
+
+	// JWT
+	implementation("io.jsonwebtoken:jjwt-api:_")
+	implementation("io.jsonwebtoken:jjwt-impl:_")
+	implementation("io.jsonwebtoken:jjwt-jackson:_")
+	implementation("javax.xml.bind:jaxb-api:_")//?
+	implementation("com.googlecode.json-simple:json-simple:_")
+	implementation("com.google.api-client:google-api-client:_")
 }
 
 tasks.named('test') {
