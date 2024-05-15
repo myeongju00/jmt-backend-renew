@@ -43,6 +43,21 @@ dependencies {
 	implementation("javax.xml.bind:jaxb-api:_")//?
 	implementation("com.googlecode.json-simple:json-simple:_")
 	implementation("com.google.api-client:google-api-client:_")
+
+	// QueryDSL 설정
+	implementation ("com.querydsl:querydsl-jpa:5.1.0:jakarta")
+	annotationProcessor ("com.querydsl:querydsl-apt:5.1.0:jakarta")
+	annotationProcessor ("jakarta.annotation:jakarta.annotation-api")
+	annotationProcessor ("jakarta.persistence:jakarta.persistence-api")
+	// -- QueryDSL ---
+}
+
+def querydslSrcDir = 'src/main/java/com/gdsc/jmt/querydsl'
+clean {
+	delete file(querydslSrcDir)
+}
+tasks.withType(JavaCompile).configureEach {
+	options.generatedSourceOutputDirectory = file(querydslSrcDir)
 }
 
 tasks.named('test') {
