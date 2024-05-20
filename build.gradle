@@ -50,6 +50,10 @@ dependencies {
 	annotationProcessor ("jakarta.annotation:jakarta.annotation-api")
 	annotationProcessor ("jakarta.persistence:jakarta.persistence-api")
 	// -- QueryDSL ---
+
+	//redis
+//	implementation("org.springframework.boot:spring-boot-starter-data-cache")
+	implementation("org.springframework.boot:spring-boot-starter-data-redis")
 }
 
 def querydslSrcDir = 'src/main/java/com/gdsc/jmt/querydsl'
