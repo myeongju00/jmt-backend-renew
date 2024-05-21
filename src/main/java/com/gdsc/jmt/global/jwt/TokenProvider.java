@@ -1,11 +1,13 @@
 package com.gdsc.jmt.global.jwt;
 
+import com.gdsc.jmt.domain.user.entity.common.SocialType;
 import com.gdsc.jmt.global.jwt.dto.TokenResponse;
 import com.gdsc.jmt.global.jwt.dto.UserInfo;
 import com.gdsc.jmt.domain.user.entity.common.RoleType;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -38,17 +40,18 @@ public class TokenProvider {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public TokenResponse generateJwtToken(String email, RoleType role) {
+    public TokenResponse generateJwtToken(SocialType provider, String email, RoleType role) {
         long now = getNowDateTime();
 
         Map<String, Object> payloads = Map.of(
+                "provider", provider,
                 "email", email,
                 AUTHORITIES_KEY, role);
 
 
         Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
         String accessToken = Jwts.builder() // payload "email": "email"
-                .claims(payloads)           // payload "aggregatedId : "userAggregateId" , "auth": "ROLE_USER"
+                .claims(payloads)           // payload  , "auth": "ROLE_USER"
                 .expiration(accessTokenExpiresIn)        // payload "exp": 1516239022 (예시)
                 .signWith(this.key)    // header "alg": "HS512"
                 .compact();
@@ -65,6 +68,18 @@ public class TokenProvider {
         return (new Date()).getTime();
     }
 
+    public Duration getTokenExpirationTime(String token) {
+        return Duration.ofMillis(parseClaims(token).getExpiration().getTime());
+    }
+
+    public String getEmail(String requestRefreshToken) {
+        return parseClaims(requestRefreshToken).get("email").toString();
+    }
+
+    public SocialType getSocialType(String requestRefreshTokenInHeader) {
+        return parseClaims(requestRefreshTokenInHeader).get("provider", SocialType.class);
+    }
+
     public Authentication getAuthentication(String accessToken) {
         Claims claims = parseClaims(accessToken);
 
@@ -79,7 +94,7 @@ public class TokenProvider {
                         .toList();
 
         // UserDetails 객체를 만들어서 Authentication 리턴
-        UserDetails principal = new UserInfo(claims.get("email").toString(), authorities);
+        UserDetails principal = new UserInfo(claims.get("email").toString(),claims.get("provider", SocialType.class), authorities);
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 
