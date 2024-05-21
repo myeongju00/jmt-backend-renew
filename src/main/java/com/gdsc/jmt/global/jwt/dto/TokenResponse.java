@@ -19,4 +19,8 @@ public class TokenResponse {
         // 기본값
         this.userLoginAction = UserLoginAction.LOG_IN;
     }
+
+    public void updateLoginActionFlag(UserLoginAction userLoginAction){
+        this.userLoginAction = userLoginAction;
+    }
 }
