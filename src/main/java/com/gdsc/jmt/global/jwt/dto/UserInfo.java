@@ -55,8 +55,8 @@ public class UserInfo implements UserDetails, CredentialsContainer {
         return this.email;
     }
 
-    public SocialType getProvider() {
-        return this.provider;
+    public String getProvider() {
+        return String.valueOf(this.provider);
     }
 
 

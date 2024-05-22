@@ -3,9 +3,9 @@ package com.gdsc.jmt.domain.user.service;
 import static com.gdsc.jmt.global.messege.AuthMessage.GOOGLE_INVALID_ID_TOKEN;
 
 import com.gdsc.jmt.domain.user.dao.UserDao;
-import com.gdsc.jmt.domain.user.dto.LogoutRequest;
 import com.gdsc.jmt.domain.user.entity.common.RoleType;
-import com.gdsc.jmt.domain.user.entity.common.SocialType;
+import com.gdsc.jmt.domain.user.oauth.info.OAuth2UserInfo;
+import com.gdsc.jmt.domain.user.oauth.info.impl.AppleOAuth2UserInfo;
 import com.gdsc.jmt.domain.user.oauth.info.impl.GoogleOAuth2UserInfo;
 import com.gdsc.jmt.global.exception.ApiException;
 import com.gdsc.jmt.global.jwt.TokenProvider;
@@ -52,13 +52,13 @@ public class AuthService {
             }
             else {
                 GoogleOAuth2UserInfo userInfo = new GoogleOAuth2UserInfo(googleIdToken.getPayload());
-
-                TokenResponse tokenResponse = generateJwtToken(userInfo.getSocialType(), userInfo.getEmail());
+                String provider = String.valueOf(userInfo.getSocialType());
+                TokenResponse tokenResponse = generateJwtToken(provider, userInfo.getEmail());
 
                 UserLoginAction loginAction = userDao.signUpOrSignIn(userInfo);
                 tokenResponse.updateLoginActionFlag(loginAction);
 
-                return generateJwtToken(userInfo.getSocialType(), userInfo.getEmail());
+                return generateJwtToken(provider, userInfo.getEmail());
             }
         } catch (IllegalArgumentException | HttpClientErrorException | GeneralSecurityException | IOException e) {
             throw new ApiException(GOOGLE_INVALID_ID_TOKEN);
@@ -72,53 +72,70 @@ public class AuthService {
 //    }
 
     @Transactional
-    public void logout(String email, SocialType provider, String requestRefreshToken) {
+    public TokenResponse loginForTest(String email) {
+        OAuth2UserInfo userInfo = new AppleOAuth2UserInfo("test", email);
+        UserLoginAction action = userDao.signUpOrSignIn(userInfo);
+        TokenResponse tokenResponse = generateJwtToken("test", userInfo.getEmail());
+        tokenResponse.updateLoginActionFlag(action);
+        return tokenResponse;
+    }
+
+    @Transactional
+    public void logout(String email, String provider, String requestRefreshToken) {
         validateRefreshToken(requestRefreshToken);
 
-        String refreshTokenInRedis = redisService.getValues("RT(" + provider + "):" + email);
+        String refreshTokenInRedis = getRedisServiceValues(String.valueOf(provider), email);
 
         if(refreshTokenInRedis == null || !refreshTokenInRedis.equals(requestRefreshToken)) {
             throw new ApiException(UserMessage.REFRESH_TOKEN_INVALID);
         }
 
         // Redis에 저장되어 있는 RT 삭제
-        redisService.deleteValues("RT(" + provider + "):" + email);
+        deleteRedisValue(String.valueOf(provider), email);
     }
 
     // 토큰 재발급: validate 메서드가 true 반환할 때만 사용 -> AT, RT 재발급
     @Transactional
-    public TokenResponse reissue(LogoutRequest logoutRequest) {
-        String accessToken = logoutRequest.accessToken();
-        String requestRefreshToken = logoutRequest.refreshToken();
+    public TokenResponse reissue(String accessToken, String refreshToken) {
 
-        validateRefreshToken(requestRefreshToken);
+        validateRefreshToken(refreshToken);
         validateAccessToken(accessToken); // AT 유효성 검사
 
-        SocialType provider = tokenProvider.getSocialType(accessToken);
+        String provider = tokenProvider.getSocialType(accessToken);
         String email = tokenProvider.getEmail(accessToken);
-
-        String refreshTokenInRedis = redisService.getValues("RT(" + provider + "):" + email);
+        String refreshTokenInRedis = getRedisServiceValues(provider, email);
 
         if (refreshTokenInRedis == null) { // Redis에 저장되어 있는 RT가 없을 경우
             return null; // -> 재로그인 요청
         }
 
         // 요청된 RT의 유효성 검사 & Redis에 저장되어 있는 RT와 같은지 비교
-        if(!tokenProvider.validateToken(requestRefreshToken) || !refreshTokenInRedis.equals(requestRefreshToken)) {
-            redisService.deleteValues("RT(" + provider + "):" + email); // 탈취 가능성 -> 삭제
+        if(!isValidateToken(refreshToken) || !refreshTokenInRedis.equals(refreshToken)) {
+            deleteRedisValue(provider, email); // 탈취 가능성 -> 삭제
             return null; // -> 재로그인 요청
         }
 
         // 토큰 재발급 및 Redis 업데이트
-        redisService.deleteValues("RT(" + provider + "):" + email); // 기존 RT 삭제
+        deleteRedisValue(provider, email); // 기존 RT 삭제
         return generateJwtToken(provider, email);
     }
 
+    private boolean isValidateToken(String token) {
+        return tokenProvider.validateToken(token);
+    }
 
-    private TokenResponse generateJwtToken(SocialType provider, String email) {
+    private String getRedisServiceValues(String provider, String email) {
+        return redisService.getValues("RT(" + provider + "):" + email);
+    }
+
+    private void deleteRedisValue(String provider, String email) {
+        redisService.deleteValues("RT(" + provider + "):" + email);
+    }
+
+    private TokenResponse generateJwtToken(String provider, String email) {
         // RT가 이미 있을 경우
-        if(redisService.getValues("RT(" + provider + "):" + email) != null) {
-            redisService.deleteValues("RT(" + provider + "):" + email); // 삭제
+        if(getRedisServiceValues(provider, email) != null) {
+            deleteRedisValue(provider, email); // 삭제
         }
         // AT, RT 생성 및 Redis에 RT 저장
         TokenResponse tokenDto = createJwtToken(provider, email);
@@ -127,23 +144,23 @@ public class AuthService {
     }
 
     @Transactional
-    public void saveRefreshToken(SocialType provider, String email, String refreshToken) {
+    public void saveRefreshToken(String provider, String email, String refreshToken) {
         redisService.setValues("RT(" + provider + "):" + email, // key
                 refreshToken, // value
                 tokenProvider.getTokenExpirationTime(refreshToken)); // timeout(milliseconds)
     }
 
-    private TokenResponse createJwtToken(SocialType provider, String email) {
+    private TokenResponse createJwtToken(String provider, String email) {
         return tokenProvider.generateJwtToken(provider, email, RoleType.MEMBER);
     }
 
     private void validateRefreshToken(String refreshToken) {
-        if(!tokenProvider.validateToken(refreshToken))
+        if(!isValidateToken(refreshToken))
             throw new ApiException(UserMessage.REFRESH_TOKEN_INVALID);
     }
 
     private void validateAccessToken(String accessToken) {
-        if(!tokenProvider.validateToken(accessToken))
+        if(!isValidateToken(accessToken))
             throw new ApiException(UserMessage.ACCESS_TOKEN_INVALID);
     }
 }

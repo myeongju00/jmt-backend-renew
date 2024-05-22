@@ -57,14 +57,15 @@ public class JwtTokenProviderTest {
         assertThat(jwtTokenProvider.getEmail(token)).isEqualTo(payload.get("email"));
     }
 
-    @DisplayName("유효하지 않은 토큰 형식의 토큰인 경우 예외를 발생시킨다.")    // 7
+    @DisplayName("유효하지 않은 토큰 형식의 토큰인 경우 False를 발생시킨다.")    // 7
     @Test
     void getPayloadByInvalidToken() {
-        assertThatExceptionOfType(ApiException.class)
-                .isThrownBy(() -> jwtTokenProvider.validateToken(null));
+        assertThat(jwtTokenProvider.validateToken(null)).isFalse();
+//        assertThatExceptionOfType(ApiException.class)
+//                .isThrownBy(() -> jwtTokenProvider.validateToken(null));
     }
 
-    @DisplayName("만료된 토큰으로 payload를 조회할 경우 예외를 발생시킨다.")
+    @DisplayName("만료된 토큰으로 payload를 조회할 경우 False를 발생시킨다.")
     @Test
     void getPayloadByExpiredToken() {
         final String expiredToken = Jwts.builder()
@@ -72,11 +73,12 @@ public class JwtTokenProviderTest {
                 .expiration(new Date((new Date()).getTime() - 1))    // 8
                 .compact();
 
-        assertThatExceptionOfType(ApiException.class)
-                .isThrownBy(() -> jwtTokenProvider.validateToken(expiredToken));
+        assertThat(jwtTokenProvider.validateToken(expiredToken)).isFalse();
+//        assertThatExceptionOfType(ApiException.class)
+//                .isThrownBy(() -> jwtTokenProvider.validateToken(expiredToken));
     }
 
-    @DisplayName("시크릿 키가 틀린 토큰 정보로 payload를 조회할 경우 예외를 발생시킨다.")
+    @DisplayName("시크릿 키가 틀린 토큰 정보로 payload를 조회할 경우 False를 발생시킨다.")
     @Test
     void getPayloadByWrongSecretKeyToken() {
         long now = (new Date()).getTime();
@@ -84,8 +86,9 @@ public class JwtTokenProviderTest {
                 now,
                 Map.of("email", "test"));
 
-        assertThatExceptionOfType(ApiException.class)
-                .isThrownBy(() -> jwtTokenProvider.validateToken(invalidSecretToken));
+        assertThat(jwtTokenProvider.validateToken(invalidSecretToken)).isFalse();
+//        assertThatExceptionOfType(ApiException.class)
+//                .isThrownBy(() -> jwtTokenProvider.validateToken(invalidSecretToken));
     }
 }
 

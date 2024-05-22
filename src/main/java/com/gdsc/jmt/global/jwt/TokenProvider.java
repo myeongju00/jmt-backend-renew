@@ -42,7 +42,7 @@ public class TokenProvider {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public TokenResponse generateJwtToken(SocialType provider, String email, RoleType role) {
+    public TokenResponse generateJwtToken(String provider, String email, RoleType role) {
         long now = getNowDateTime();
 
         Map<String, Object> payloads = Map.of(
@@ -86,8 +86,8 @@ public class TokenProvider {
         return parseClaims(requestRefreshToken).get("email").toString();
     }
 
-    public SocialType getSocialType(String requestRefreshTokenInHeader) {
-        return parseClaims(requestRefreshTokenInHeader).get("provider", SocialType.class);
+    public String getSocialType(String requestRefreshTokenInHeader) {
+        return parseClaims(requestRefreshTokenInHeader).get("provider").toString();
     }
 
     public Authentication getAuthentication(String accessToken) {
@@ -119,18 +119,18 @@ public class TokenProvider {
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             //TODO : 나중에 되면 sentry 해보기
             logger.warn("잘못된 JWT 서명입니다.");
-            throw new ApiException(AuthMessage.INVALID_JWT_SIGNATURE);
+//            throw new ApiException(AuthMessage.INVALID_JWT_SIGNATURE);
         } catch (ExpiredJwtException e) {
             logger.warn("만료된 JWT 토큰입니다.");
-            throw new ApiException(AuthMessage.INVALID_TOKEN_EXPIRED);
+//            throw new ApiException(AuthMessage.INVALID_TOKEN_EXPIRED);
         } catch (UnsupportedJwtException e) {
             logger.warn("지원되지 않는 JWT 토큰입니다.");
-            throw new ApiException(AuthMessage.INVALID_TOKEN);
+//            throw new ApiException(AuthMessage.INVALID_TOKEN);
         } catch (IllegalArgumentException e) {
             logger.warn("JWT 토큰이 잘못되었습니다.");
-            throw new ApiException(AuthMessage.INVALID_TOKEN);
+//            throw new ApiException(AuthMessage.INVALID_TOKEN);
         }
-//        return false;
+        return false;
     }
 
     public Claims parseClaims(String accessToken) {
