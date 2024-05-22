@@ -1,6 +1,6 @@
 package com.gdsc.jmt.domain.user.controller.springdocs;
 
-import com.gdsc.jmt.domain.user.command.controller.springdocs.model.RefreshTokenInvalidException;
+import com.gdsc.jmt.domain.user.controller.springdocs.model.RefreshTokenInvalidException;
 import com.gdsc.jmt.global.controller.springdocs.UnauthorizedException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
