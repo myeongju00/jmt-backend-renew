@@ -1,5 +1,6 @@
 package com.gdsc.jmt.global.jwt.dto;
 
+import com.gdsc.jmt.domain.user.entity.common.SocialType;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
@@ -22,6 +23,7 @@ public class UserInfo implements UserDetails, CredentialsContainer {
     private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
     private static final Log logger = LogFactory.getLog(User.class);
     private final String email;
+    private final SocialType provider;
     private final Set<GrantedAuthority> authorities;
     private final boolean accountNonExpired;
 
@@ -31,16 +33,17 @@ public class UserInfo implements UserDetails, CredentialsContainer {
 
     private final boolean enabled;
 
-    public UserInfo(String email, Collection<? extends GrantedAuthority> authorities) {
-        this(email, true, true, true, true, authorities);
+    public UserInfo(String email, SocialType provider, Collection<? extends GrantedAuthority> authorities) {
+        this(email, provider, true, true, true, true, authorities);
     }
 
-    public UserInfo(String email, boolean enabled, boolean accountNonExpired,
+    public UserInfo(String email, SocialType provider, boolean enabled, boolean accountNonExpired,
                 boolean credentialsNonExpired, boolean accountNonLocked,
                 Collection<? extends GrantedAuthority> authorities) {
         Assert.isTrue(email != null && !"".equals(email),
                 "Cannot pass null or empty values to constructor");
         this.email = email;
+        this.provider = provider;
         this.enabled = enabled;
         this.accountNonExpired = accountNonExpired;
         this.credentialsNonExpired = credentialsNonExpired;
@@ -50,6 +53,10 @@ public class UserInfo implements UserDetails, CredentialsContainer {
 
     public String getEmail() {
         return this.email;
+    }
+
+    public String getProvider() {
+        return String.valueOf(this.provider);
     }
 
 

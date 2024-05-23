@@ -1,11 +1,15 @@
 package com.gdsc.jmt.global.jwt;
 
+import com.gdsc.jmt.domain.user.entity.common.SocialType;
+import com.gdsc.jmt.global.exception.ApiException;
 import com.gdsc.jmt.global.jwt.dto.TokenResponse;
 import com.gdsc.jmt.global.jwt.dto.UserInfo;
 import com.gdsc.jmt.domain.user.entity.common.RoleType;
+import com.gdsc.jmt.global.messege.AuthMessage;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -38,31 +42,52 @@ public class TokenProvider {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public TokenResponse generateJwtToken(String email, RoleType role) {
+    public TokenResponse generateJwtToken(String provider, String email, RoleType role) {
         long now = getNowDateTime();
 
         Map<String, Object> payloads = Map.of(
+                "provider", provider,
                 "email", email,
                 AUTHORITIES_KEY, role);
 
-
+        String accessToken = createAccessToken(now, payloads);
         Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
-        String accessToken = Jwts.builder() // payload "email": "email"
-                .claims(payloads)           // payload "aggregatedId : "userAggregateId" , "auth": "ROLE_USER"
-                .expiration(accessTokenExpiresIn)        // payload "exp": 1516239022 (예시)
-                .signWith(this.key)    // header "alg": "HS512"
-                .compact();
-
-        String refreshToken = Jwts.builder()
-                .expiration(new Date(now + REFRESH_TOKEN_EXPIRE_TIME))
-                .signWith(this.key)
-                .compact();
+        String refreshToken = createRefreshToken(now);
 
         return new TokenResponse(BEARER_TYPE, accessToken, refreshToken, accessTokenExpiresIn.getTime());
     }
 
+    public String createRefreshToken(long now) {
+        return Jwts.builder()
+                .expiration(new Date(now + REFRESH_TOKEN_EXPIRE_TIME))
+                .signWith(this.key)
+                .compact();
+    }
+
+
+    public String createAccessToken(long now, Map<String, Object> payloads) {
+        Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
+        return Jwts.builder() // payload "email": "email"
+                .claims(payloads)           // payload  , "auth": "ROLE_USER"
+                .expiration(accessTokenExpiresIn)        // payload "exp": 1516239022 (예시)
+                .signWith(this.key)    // header "alg": "HS512"
+                .compact();
+    }
+
     private static long getNowDateTime() {
         return (new Date()).getTime();
+    }
+
+    public Duration getTokenExpirationTime(String token) {
+        return Duration.ofMillis(parseClaims(token).getExpiration().getTime());
+    }
+
+    public String getEmail(String requestRefreshToken) {
+        return parseClaims(requestRefreshToken).get("email").toString();
+    }
+
+    public String getSocialType(String requestRefreshTokenInHeader) {
+        return parseClaims(requestRefreshTokenInHeader).get("provider").toString();
     }
 
     public Authentication getAuthentication(String accessToken) {
@@ -79,7 +104,7 @@ public class TokenProvider {
                         .toList();
 
         // UserDetails 객체를 만들어서 Authentication 리턴
-        UserDetails principal = new UserInfo(claims.get("email").toString(), authorities);
+        UserDetails principal = new UserInfo(claims.get("email").toString(),claims.get("provider", SocialType.class), authorities);
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 
@@ -94,12 +119,16 @@ public class TokenProvider {
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             //TODO : 나중에 되면 sentry 해보기
             logger.warn("잘못된 JWT 서명입니다.");
+//            throw new ApiException(AuthMessage.INVALID_JWT_SIGNATURE);
         } catch (ExpiredJwtException e) {
             logger.warn("만료된 JWT 토큰입니다.");
+//            throw new ApiException(AuthMessage.INVALID_TOKEN_EXPIRED);
         } catch (UnsupportedJwtException e) {
             logger.warn("지원되지 않는 JWT 토큰입니다.");
+//            throw new ApiException(AuthMessage.INVALID_TOKEN);
         } catch (IllegalArgumentException e) {
             logger.warn("JWT 토큰이 잘못되었습니다.");
+//            throw new ApiException(AuthMessage.INVALID_TOKEN);
         }
         return false;
     }
