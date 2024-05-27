@@ -2,6 +2,7 @@ package com.gdsc.jmt.domain.user.service;
 
 import static com.gdsc.jmt.global.messege.AuthMessage.GOOGLE_INVALID_ID_TOKEN;
 
+import com.gdsc.jmt.domain.user.apple.AppleUtil;
 import com.gdsc.jmt.domain.user.dao.UserDao;
 import com.gdsc.jmt.domain.user.entity.common.RoleType;
 import com.gdsc.jmt.domain.user.oauth.info.OAuth2UserInfo;
@@ -37,6 +38,7 @@ public class AuthService {
     private final TokenProvider tokenProvider;
     private final RedisService redisService;
     private final UserDao userDao;
+    private final AppleUtil appleUtil;
 
     @Transactional
     public TokenResponse googleLogin(String idToken) {
@@ -63,6 +65,17 @@ public class AuthService {
         } catch (IllegalArgumentException | HttpClientErrorException | GeneralSecurityException | IOException e) {
             throw new ApiException(GOOGLE_INVALID_ID_TOKEN);
         }
+    }
+
+    @Transactional
+    public TokenResponse appleLogin(String idToken) {
+        OAuth2UserInfo userInfo = appleUtil.getAppleUserInfo(idToken);
+        String provider = String.valueOf(userInfo.getSocialType());
+        UserLoginAction action = userDao.signUpOrSignIn(userInfo);
+
+        TokenResponse tokenResponse = generateJwtToken(provider, userInfo.getEmail());
+        tokenResponse.updateLoginActionFlag(action);
+        return tokenResponse;
     }
 
 //    @Transactional
