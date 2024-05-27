@@ -54,6 +54,9 @@ dependencies {
 	//redis
 //	implementation("org.springframework.boot:spring-boot-starter-data-cache")
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
+
+	// openFeign
+	implementation("org.springframework.cloud:spring-cloud-starter-openfeign:_")
 }
 
 def querydslSrcDir = 'src/main/java/com/gdsc/jmt/querydsl'
