@@ -57,9 +57,17 @@ dependencies {
 
 	// openFeign
 	implementation("org.springframework.cloud:spring-cloud-starter-openfeign:_")
+
+	//S3
+	implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:_")
+	implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:_")
 }
 
-def querydslSrcDir = 'src/main/java/com/gdsc/jmt/querydsl'
+tasks.withType(JavaExec).configureEach {
+	environment "AWS_REGION", "ap-northeast-2"
+}
+
+def querydslSrcDir = 'src/main/java/querydsl'
 clean {
 	delete file(querydslSrcDir)
 }
