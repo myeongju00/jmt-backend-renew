@@ -63,10 +63,6 @@ dependencies {
 	implementation("io.awspring.cloud:spring-cloud-aws-starter-s3:_")
 }
 
-tasks.withType(JavaExec).configureEach {
-	environment "AWS_REGION", "ap-northeast-2"
-}
-
 def querydslSrcDir = 'src/main/java/querydsl'
 clean {
 	delete file(querydslSrcDir)

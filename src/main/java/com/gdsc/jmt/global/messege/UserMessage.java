@@ -22,7 +22,8 @@ public enum UserMessage implements ResponseMessage{
     PROFILE_IMAGE_NOT_FOUND("프로필 이미지가 없습니다", HttpStatus.BAD_REQUEST),
     USER_REMOVE_SUCCESS("회원 탈퇴에 성공하였습니다.", HttpStatus.OK),
     GET_LOCATION_FIND_SUCCESS("위치 검색에 성공하였습니다.", HttpStatus.OK),
-    ACCESS_TOKEN_INVALID("AccessToken이 유효하지 않습니다.", HttpStatus.BAD_REQUEST);
+    ACCESS_TOKEN_INVALID("AccessToken이 유효하지 않습니다.", HttpStatus.BAD_REQUEST),
+    PROFILE_CONTENT_TYPE_ERROR("이미지 파일만 업로드 가능합니다.", HttpStatus.BAD_REQUEST),;
 
     private final String message;
     private final HttpStatus status;
