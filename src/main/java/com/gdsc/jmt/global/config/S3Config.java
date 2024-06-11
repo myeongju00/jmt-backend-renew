@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Primary;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.regions.providers.AwsRegionProvider;
 import software.amazon.awssdk.services.s3.S3Client;
 
 @Configuration
@@ -39,7 +40,12 @@ public class S3Config {
     public S3Client s3Client() {
         return S3Client.builder()
                 .credentialsProvider(customAwsCredentialsProvider())
-                .region(Region.of(region))
+                .region(customAwsRegionProvider().getRegion())
                 .build();
+    }
+
+    @Bean
+    public AwsRegionProvider customAwsRegionProvider() {
+        return () -> Region.of(region);
     }
 }
