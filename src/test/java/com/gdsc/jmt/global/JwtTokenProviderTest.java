@@ -4,6 +4,7 @@ package com.gdsc.jmt.global;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
+import com.gdsc.jmt.CustomSpringBootTest;
 import com.gdsc.jmt.global.exception.ApiException;
 import com.gdsc.jmt.global.jwt.TokenProvider;
 import io.jsonwebtoken.Jwts;
@@ -19,8 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-@SpringBootTest
-@ActiveProfiles("dev")
+@CustomSpringBootTest
 public class JwtTokenProviderTest {
     @Autowired
     private TokenProvider jwtTokenProvider;
@@ -45,7 +45,7 @@ public class JwtTokenProviderTest {
         assertThat(refreshToken).isNotNull();
     }
 
-    @DisplayName("올바른 토큰 정보로 payload를 조회한다.")    // 6
+    @DisplayName("올바른 토큰 정보로 payload를 조회한다.")
     @Test
     void getPayloadByValidToken() {
         final long now = (new Date()).getTime();
@@ -57,7 +57,7 @@ public class JwtTokenProviderTest {
         assertThat(jwtTokenProvider.getEmail(token)).isEqualTo(payload.get("email"));
     }
 
-    @DisplayName("유효하지 않은 토큰 형식의 토큰인 경우 False를 발생시킨다.")    // 7
+    @DisplayName("유효하지 않은 토큰 형식의 토큰인 경우 False를 발생시킨다.")
     @Test
     void getPayloadByInvalidToken() {
         assertThat(jwtTokenProvider.validateToken(null)).isFalse();

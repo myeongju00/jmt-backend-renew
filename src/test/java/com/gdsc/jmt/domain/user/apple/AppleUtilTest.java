@@ -2,19 +2,15 @@ package com.gdsc.jmt.domain.user.apple;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.gdsc.jmt.CustomSpringBootTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
-@SpringBootTest
-@ActiveProfiles("dev")
+@CustomSpringBootTest
 class AppleUtilTest {
     @Autowired
-    AppleUtil appleUtil;
+    private AppleUtil appleUtil;
 
     @Test
     @DisplayName("Apple 공개키를 가져온다.")
