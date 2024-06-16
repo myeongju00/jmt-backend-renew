@@ -29,6 +29,10 @@ public class UserDao {
         }
     }
 
+    public void saveTestUser(UserEntity userEntity) {
+        userRepository.save(userEntity);
+    }
+
     public boolean isExistNickname(String nickname) {
         return userRepository.findByNickname(nickname).isPresent();
     }
@@ -39,11 +43,12 @@ public class UserDao {
         );
     }
 
-    public void updateNickname(String email, String nickname) {
+    public String updateNickname(String email, String nickname) {
         UserEntity user = findUserByEmail(email);
 
         user.updateNickname(nickname);
         saveUser(user);
+        return user.getNickname();
     }
 
     public String updateProfileImage(String email, String imageUrl) {

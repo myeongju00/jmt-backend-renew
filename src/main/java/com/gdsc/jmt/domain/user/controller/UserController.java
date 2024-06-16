@@ -30,8 +30,8 @@ public class UserController {
     @PostMapping("/user/nickname")
     @UpdateUserNicknameSpringDocs
     public JMTApiResponse<UserNicknameResponse> updateUserNickname(@AuthenticationPrincipal UserInfo user, @RequestBody NicknameRequest nicknameRequest) {
-        userService.updateUserNickName(user.getEmail(), nicknameRequest.nickname());
-        UserNicknameResponse response = new UserNicknameResponse(user.getEmail(), nicknameRequest.nickname());
+        String nickname = userService.updateUserNickName(user.getEmail(), nicknameRequest.nickname());
+        UserNicknameResponse response = new UserNicknameResponse(user.getEmail(), nickname);
         return JMTApiResponse.createResponseWithMessage(response, UserMessage.NICKNAME_UPDATE_SUCCESS);
     }
 

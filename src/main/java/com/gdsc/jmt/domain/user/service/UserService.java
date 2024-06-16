@@ -5,7 +5,6 @@ import com.gdsc.jmt.global.exception.ApiException;
 import com.gdsc.jmt.global.messege.UserMessage;
 import com.gdsc.jmt.global.service.S3FileService;
 import java.io.IOException;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,11 +18,11 @@ public class UserService {
     private final String DEFAULT_PROFILE_IMAGE_URL = "https://gdsc-jmt.s3.ap-northeast-2.amazonaws.com/profileImg/defaultImg/Default+image.png";
 
     @Transactional
-    public void updateUserNickName(String email, String nickName) {
+    public String updateUserNickName(String email, String nickName) {
         if(userDao.isExistNickname(nickName)) {
             throw new ApiException(UserMessage.NICKNAME_IS_DUPLICATED);
         }
-        userDao.updateNickname(email, nickName);
+        return userDao.updateNickname(email, nickName);
     }
 
     @Transactional

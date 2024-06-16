@@ -7,6 +7,7 @@ import com.gdsc.jmt.domain.user.entity.UserEntity;
 import com.gdsc.jmt.domain.user.entity.common.Status;
 import com.gdsc.jmt.domain.user.oauth.info.OAuth2UserInfo;
 import com.gdsc.jmt.domain.user.oauth.info.impl.AppleOAuth2UserInfo;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,11 @@ class UserRepositoryTest {
         );
 
         user = userRepository.save(userInfo.createUserEntity());
+    }
+
+    @AfterEach
+    void tearDown() {
+        userRepository.delete(user);
     }
 
     @Test
