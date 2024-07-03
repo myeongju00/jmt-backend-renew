@@ -1,7 +1,6 @@
 package com.gdsc.jmt.domain.user.repository;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.gdsc.jmt.domain.user.entity.UserEntity;
 import com.gdsc.jmt.domain.user.entity.common.Status;
@@ -18,14 +17,18 @@ import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)    //  임베디드 데이터 베이스를 사용 안한다는 선언.
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class UserRepositoryTest {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     private OAuth2UserInfo userInfo;
     private UserEntity user;
+
+    @Autowired
+    UserRepositoryTest(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @BeforeEach
     void setUp() {
@@ -34,26 +37,30 @@ class UserRepositoryTest {
                 "test@test.com"
         );
 
-        user = userRepository.save(userInfo.createUserEntity());
+        user = userInfo.createUserEntity();
+        userRepository.save(user);
     }
 
     @AfterEach
     void tearDown() {
-        userRepository.delete(user);
+        userRepository.deleteAll();
     }
 
     @Test
     @DisplayName("사용자 저장 테스트")
     void save() {
-        assertThat(user.getEmail()).isEqualTo(userInfo.getEmail());
-        assertThat(user.getStatus()).isEqualTo(Status.ACTIVE);
+        UserEntity savedUser = userRepository.findByEmail(user.getEmail()).orElse(null);
+
+        assertThat(savedUser).isNotNull();
+        assertThat(savedUser.getEmail()).isEqualTo(userInfo.getEmail());
+        assertThat(savedUser.getStatus()).isEqualTo(Status.ACTIVE);
     }
 
     @Test
     @DisplayName("이메일로 사용자 조회 테스트")
     void findByEmail() {
         UserEntity findUser = userRepository.findByEmail(user.getEmail())
-                                            .orElse(null);
+                .orElse(null);
 
         assertThat(findUser).isNotNull();
         assertThat(findUser.getEmail()).isEqualTo(user.getEmail());
@@ -63,7 +70,7 @@ class UserRepositoryTest {
     @DisplayName("닉네임으로 사용자 조회 테스트")
     void findByNickname() {
         UserEntity findUser = userRepository.findByNickname(user.getNickname())
-                                            .orElse(null);
+                .orElse(null);
 
         assertThat(findUser).isNotNull();
         assertThat(findUser.getNickname()).isEqualTo(user.getNickname());
