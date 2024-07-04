@@ -57,4 +57,10 @@ public class UserService {
             s3FileService.delete(deleteImageUrl);
         }
     }
+
+    public void checkDuplicateUserNickname(String nickName) {
+        if(userDao.isExistNickname(nickName)) {
+            throw new ApiException(UserMessage.NICKNAME_IS_DUPLICATED);
+        }
+    }
 }

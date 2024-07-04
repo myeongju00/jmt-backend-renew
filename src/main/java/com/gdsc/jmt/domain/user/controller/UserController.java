@@ -1,5 +1,6 @@
 package com.gdsc.jmt.domain.user.controller;
 
+import com.gdsc.jmt.domain.user.controller.springdocs.CheckDuplicateNicknameSpringDocs;
 import com.gdsc.jmt.domain.user.controller.springdocs.UpdateDefaultProfileImgSpringDocs;
 import com.gdsc.jmt.domain.user.controller.springdocs.UpdateUserNicknameSpringDocs;
 import com.gdsc.jmt.domain.user.controller.springdocs.UpdateUserProfileImgSpringDocs;
@@ -16,7 +17,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
@@ -63,8 +66,15 @@ public class UserController {
 
     @PostMapping(value = "/user/defaultProfileImg")
     @UpdateDefaultProfileImgSpringDocs
-    public JMTApiResponse<?> updateUserDefaultProfileImg(@AuthenticationPrincipal UserInfo user) {
+    public JMTApiResponse<String> updateUserDefaultProfileImg(@AuthenticationPrincipal UserInfo user) {
         String responseUrl = userService.updateUserDefaultProfileImg(user.getEmail());
         return JMTApiResponse.createResponseWithMessage(responseUrl, UserMessage.PROFILE_IMAGE_UPDATE_SUCCESS);
+    }
+
+    @GetMapping("/user/{nickname}")
+    @CheckDuplicateNicknameSpringDocs
+    public JMTApiResponse<String> checkDuplicateUserNickname(@PathVariable("nickname") String nickname) {
+        userService.checkDuplicateUserNickname(nickname);
+        return JMTApiResponse.createResponseWithMessage(nickname, UserMessage.NICKNAME_IS_AVAILABLE);
     }
 }
