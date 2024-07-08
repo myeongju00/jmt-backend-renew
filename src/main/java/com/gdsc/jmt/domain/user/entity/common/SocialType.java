@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum SocialType {
     GOOGLE("google"),
-    APPLE("apple");
+    APPLE("apple"),
+    TEST("test");
     private final String type;
 }

@@ -3,6 +3,7 @@ package com.gdsc.jmt.domain.user.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.gdsc.jmt.CustomSpringBootTest;
 import com.gdsc.jmt.global.exception.ApiException;
 import com.gdsc.jmt.global.jwt.TokenProvider;
 import com.gdsc.jmt.global.jwt.dto.TokenResponse;
@@ -21,8 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 @Slf4j
-@SpringBootTest
-@ActiveProfiles("dev")
+@CustomSpringBootTest
 class AuthServiceTest {
 
     @Autowired

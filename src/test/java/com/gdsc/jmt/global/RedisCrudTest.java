@@ -3,6 +3,7 @@ package com.gdsc.jmt.global;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.await;
 
+import com.gdsc.jmt.CustomSpringBootTest;
 import com.gdsc.jmt.global.service.RedisService;
 import java.time.Duration;
 import lombok.extern.slf4j.Slf4j;
@@ -11,12 +12,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 @Slf4j
-@SpringBootTest
-@ActiveProfiles("dev")
+@CustomSpringBootTest
 class RedisCrudTest {
     final String KEY = "key";
     final String VALUE = "value";
@@ -26,7 +24,7 @@ class RedisCrudTest {
     private RedisService redisService;
 
     @BeforeEach
-    void shutDown() {
+    void setUp() {
         redisService.setValues(KEY, VALUE, DURATION);
     }
 

@@ -51,4 +51,11 @@ public class UserEntity  extends BaseTimeEntity {
         this.status = status;
     }
 
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updateProfileImageUrl(String imageUrl) {
+        this.profileImageUrl = imageUrl;
+    }
 }
