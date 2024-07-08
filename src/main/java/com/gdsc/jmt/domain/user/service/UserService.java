@@ -1,6 +1,8 @@
 package com.gdsc.jmt.domain.user.service;
 
 import com.gdsc.jmt.domain.user.dao.UserDao;
+import com.gdsc.jmt.domain.user.dto.response.UserResponse;
+import com.gdsc.jmt.domain.user.entity.UserEntity;
 import com.gdsc.jmt.global.exception.ApiException;
 import com.gdsc.jmt.global.messege.UserMessage;
 import com.gdsc.jmt.global.service.S3FileService;
@@ -62,5 +64,15 @@ public class UserService {
         if(userDao.isExistNickname(nickName)) {
             throw new ApiException(UserMessage.NICKNAME_IS_DUPLICATED);
         }
+    }
+
+    public UserResponse getUser(String email) {
+        UserEntity user =  userDao.findUserByEmail(email);
+        return new UserResponse(user);
+    }
+
+    public UserResponse getUser(Long id) {
+        UserEntity user =  userDao.findUserById(id);
+        return new UserResponse(user);
     }
 }

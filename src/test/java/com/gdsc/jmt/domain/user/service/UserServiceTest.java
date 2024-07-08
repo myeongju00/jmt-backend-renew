@@ -1,29 +1,26 @@
 package com.gdsc.jmt.domain.user.service;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.gdsc.jmt.domain.user.dao.UserDao;
+import com.gdsc.jmt.domain.user.dto.response.UserResponse;
 import com.gdsc.jmt.domain.user.entity.UserEntity;
 import com.gdsc.jmt.domain.user.entity.common.RoleType;
 import com.gdsc.jmt.domain.user.entity.common.SocialType;
 import com.gdsc.jmt.domain.user.entity.common.Status;
-import com.gdsc.jmt.domain.user.repository.UserRepository;
 import com.gdsc.jmt.global.exception.ApiException;
 import com.gdsc.jmt.global.service.S3FileService;
 import java.io.IOException;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,6 +36,8 @@ class UserServiceTest {
     @InjectMocks
     private UserService userService;
     private final String email = "test@test.com";
+    private final String DEFAULT_PROFILE_IMAGE_URL = "https://gdsc-jmt.s3.ap-northeast-2.amazonaws.com/profileImg/defaultImg/Default+image.png";
+
 
     @BeforeEach
     void setUp() {
@@ -114,11 +113,37 @@ class UserServiceTest {
     @Test
     @DisplayName("기본 프로필 이미지로 변경")
     void updateUserDefaultProfileImg() {
-        when(userDao.updateProfileImage(email, "testUrl")).thenReturn("testUrl");
+        when(userDao.updateProfileImage(email, DEFAULT_PROFILE_IMAGE_URL)).thenReturn("testUrl");
 
-//        userService.updateUserDefaultProfileImg(email);
+        String result = userService.updateUserDefaultProfileImg(email);
 
         verify(s3FileService, times(1)).delete("testUrl");
+        assert(result).contains("defaultImg");
+    }
 
+    @Test
+    @DisplayName("이메일로 사용자 정보 조회하기")
+    void getUserByEmail() {
+        UserEntity userEntity = createTestUserEntity();
+        when(userDao.findUserByEmail(email)).thenReturn(userEntity);
+
+        UserResponse result = userService.getUser(email);
+
+        assertEquals(userEntity.getNickname(), result.nickname());
+        assertEquals(userEntity.getEmail(), result.email());
+        assertEquals(userEntity.getProfileImageUrl(), result.profileImg());
+
+    }
+
+    private UserEntity createTestUserEntity() {
+        UserEntity userEntity = UserEntity.builder()
+                .email(email)
+                .socialType(SocialType.GOOGLE)
+                .roleType(RoleType.MEMBER)
+                .status(Status.ACTIVE)
+                .build();
+        userEntity.updateProfileImageUrl("testImageUrl");
+        userEntity.updateNickname("testNickname");
+        return userEntity;
     }
 }

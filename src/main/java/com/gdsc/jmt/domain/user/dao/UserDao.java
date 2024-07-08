@@ -37,6 +37,12 @@ public class UserDao {
         return userRepository.findByNickname(nickname).isPresent();
     }
 
+    public UserEntity findUserById(long id) {
+        return userRepository.findById(id).orElseThrow(
+                () -> new ApiException(UserMessage.USER_NOT_FOUND)
+        );
+    }
+
     public UserEntity findUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(
                 () -> new ApiException(UserMessage.USER_NOT_FOUND)

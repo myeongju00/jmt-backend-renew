@@ -1,12 +1,14 @@
 package com.gdsc.jmt.domain.user.controller;
 
 import com.gdsc.jmt.domain.user.controller.springdocs.CheckDuplicateNicknameSpringDocs;
+import com.gdsc.jmt.domain.user.controller.springdocs.GetUserInfoSpringDocs;
 import com.gdsc.jmt.domain.user.controller.springdocs.UpdateDefaultProfileImgSpringDocs;
 import com.gdsc.jmt.domain.user.controller.springdocs.UpdateUserNicknameSpringDocs;
 import com.gdsc.jmt.domain.user.controller.springdocs.UpdateUserProfileImgSpringDocs;
 import com.gdsc.jmt.domain.user.dto.NicknameRequest;
 import com.gdsc.jmt.domain.user.dto.ProfileImgRequest;
 import com.gdsc.jmt.domain.user.dto.response.UserNicknameResponse;
+import com.gdsc.jmt.domain.user.dto.response.UserResponse;
 import com.gdsc.jmt.domain.user.service.UserService;
 import com.gdsc.jmt.global.controller.FirstVersionRestController;
 import com.gdsc.jmt.global.dto.JMTApiResponse;
@@ -76,5 +78,18 @@ public class UserController {
     public JMTApiResponse<String> checkDuplicateUserNickname(@PathVariable("nickname") String nickname) {
         userService.checkDuplicateUserNickname(nickname);
         return JMTApiResponse.createResponseWithMessage(nickname, UserMessage.NICKNAME_IS_AVAILABLE);
+    }
+
+    @GetMapping("/user/info")
+    @GetUserInfoSpringDocs
+    public JMTApiResponse<UserResponse> getUserInfo(@AuthenticationPrincipal UserInfo user) {
+        UserResponse userInfo = userService.getUser(user.getEmail());
+        return JMTApiResponse.createResponseWithMessage(userInfo, UserMessage.GET_USER_SUCCESS);
+    }
+
+    @GetMapping("/user/info/{id}")
+    public JMTApiResponse<UserResponse> findUserInfo(@PathVariable("id") Long id) {
+        UserResponse userInfo = userService.getUser(id);
+        return JMTApiResponse.createResponseWithMessage(userInfo, UserMessage.GET_USER_SUCCESS);
     }
 }
